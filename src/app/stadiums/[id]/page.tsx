@@ -34,7 +34,7 @@ export default function StadiumDetailsPage() {
     async function load() {
       try {
         const data = await getStadiumById(id);
-        if (!data || data.approved === false) {
+        if (!data || !data.approved) {
           setNotFound(true);
         } else {
           setStadium(data);

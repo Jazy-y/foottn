@@ -720,12 +720,17 @@ export const getUserEventsCount = async (userId: string): Promise<number> => {
   return snap.size;
 };
 
-// Admin-only query — returns stadiums pending approval (approved == false).
+// Admin-only query — returns stadiums pending approval.
+// Uses JS filter instead of a Firestore where() so that legacy documents
+// created before the approved:false default was added (field absent) are
+// also caught. Admins can read the full collection, so no rule issue.
 export const getPendingStadiums = async (): Promise<Stadium[]> => {
   const snap = await getDocs(
-    query(collection(db, "stadiums"), where("approved", "==", false)),
+    query(collection(db, "stadiums"), orderBy("createdAt", "desc")),
   );
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() } as Stadium));
+  return snap.docs
+    .map((d) => ({ id: d.id, ...d.data() } as Stadium))
+    .filter((s) => !s.approved); // catches approved===false AND approved===undefined
 };
 
 export const getOpenTicketsCount = async (): Promise<number> => {
