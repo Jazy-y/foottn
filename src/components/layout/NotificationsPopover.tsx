@@ -15,6 +15,7 @@ import {
 } from "@/services/db";
 import type { AppNotification, NotificationType } from "@/types";
 import { formatDistanceToNow } from "date-fns";
+import { fr } from "date-fns/locale";
 import { Timestamp } from "firebase/firestore";
 import { toast } from "sonner";
 
@@ -67,10 +68,10 @@ function NotificationAvatar({ n }: { n: AppNotification }) {
     );
   }
 
-  // Generic icon for system / non-actor notifications
+  // Generic icon for system / non-actor notifications — smaller, subtler
   return (
-    <div className="hairline shrink-0 grid h-9 w-9 place-items-center rounded-xl bg-card">
-      <Icon className="h-3.5 w-3.5 text-primary" />
+    <div className="shrink-0 grid h-9 w-9 place-items-center rounded-xl bg-primary/[0.07] border border-primary/10">
+      <Icon className="h-3.5 w-3.5 text-primary/60" />
     </div>
   );
 }
@@ -105,7 +106,9 @@ export function NotificationsPopover() {
           if (!n.read) {
             toast(n.title, {
               description: n.body,
-              icon: <Bell className="h-4 w-4" />
+              icon: n.actorPhoto
+                ? <img src={n.actorPhoto} alt="" className="h-5 w-5 rounded-full object-cover" />
+                : <Bell className="h-4 w-4" />,
             });
           }
         }
@@ -166,7 +169,7 @@ export function NotificationsPopover() {
                     </div>
                     {date && (
                       <div className="mt-1 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-                        {formatDistanceToNow(date, { addSuffix: true })}
+                        {formatDistanceToNow(date, { addSuffix: true, locale: fr })}
                       </div>
                     )}
                   </div>
