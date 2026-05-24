@@ -10,6 +10,7 @@ import {
 import { AuthGuard } from "@/components/layout/AuthGuard";
 import { useAuth } from "@/contexts/AuthContext";
 import { createStadium, deleteStadium, getStadiumsByOwner } from "@/services/db";
+import { uploadToCloudinary } from "@/lib/cloudinary";
 import type { Stadium } from "@/types";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -77,10 +78,7 @@ export default function OwnerStadiumsPage() {
     let imageUrl = "";
     try {
       if (file) {
-        const fd = new FormData();
-        fd.append("file", file);
-        const res = await fetch("/api/upload", { method: "POST", body: fd });
-        if (res.ok) ({ url: imageUrl } = await res.json());
+        imageUrl = await uploadToCloudinary(file, "foottn/stadiums");
       }
       await createStadium({
         ownerId: user.uid, name,

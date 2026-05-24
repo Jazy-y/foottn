@@ -20,6 +20,7 @@ import {
 import type { Post } from "@/types";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
+import { uploadToCloudinary } from "@/lib/cloudinary";
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 function toDate(t: unknown): Date | null {
@@ -196,10 +197,7 @@ function Composer({ user, onPost }: { user: ReturnType<typeof useAuth>["user"]; 
     try {
       let imageUrl: string | undefined;
       if (imageFile) {
-        const fd = new FormData(); fd.append("file", imageFile);
-        const res = await fetch("/api/upload", { method: "POST", body: fd });
-        if (!res.ok) throw new Error();
-        imageUrl = (await res.json()).url;
+        imageUrl = await uploadToCloudinary(imageFile, "foottn/posts");
       }
       const id = await createPost({
         authorId: user.uid,
@@ -301,10 +299,7 @@ export default function FeedPage() {
     try {
       let imageUrl = editingPost.imageUrl;
       if (editFile) {
-        const fd = new FormData(); fd.append("file", editFile);
-        const res = await fetch("/api/upload", { method: "POST", body: fd });
-        if (!res.ok) throw new Error();
-        imageUrl = (await res.json()).url;
+        imageUrl = await uploadToCloudinary(editFile, "foottn/posts");
       }
       const newText = editText.trim();
       await updatePost(editingPost.id, { text: newText, imageUrl });

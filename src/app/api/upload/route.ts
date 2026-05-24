@@ -1,46 +1,56 @@
 import { NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
-import crypto from "crypto";
-import fs from "fs";
 
+/**
+ * POST /api/upload
+ * Server-side proxy to Cloudinary for cases where a server API route is needed.
+ * Client components should call uploadToCloudinary() from src/lib/cloudinary.ts
+ * directly — it's faster (no double hop) and needs no server.
+ */
 export async function POST(request: Request) {
   try {
     const formData = await request.formData();
-    const file = formData.get("file") as File;
+    const file = formData.get("file") as File | null;
 
     if (!file) {
+      return NextResponse.json({ error: "No file provided" }, { status: 400 });
+    }
+
+    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+
+    if (!cloudName || !uploadPreset) {
       return NextResponse.json(
-        { error: "No file provided" },
-        { status: 400 }
+        { error: "Cloudinary is not configured on the server." },
+        { status: 500 },
       );
     }
 
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
+    const fd = new FormData();
+    fd.append("file", file);
+    fd.append("upload_preset", uploadPreset);
+    fd.append("folder", "foottn");
 
-    // Ensure uploads directory exists
-    const uploadDir = path.join(process.cwd(), "public/uploads");
-    if (!fs.existsSync(uploadDir)) {
-      await mkdir(uploadDir, { recursive: true });
+    const res = await fetch(
+      `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+      { method: "POST", body: fd },
+    );
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      console.error("Cloudinary upload error:", err);
+      return NextResponse.json(
+        { error: "Cloudinary upload failed" },
+        { status: 500 },
+      );
     }
 
-    // Generate unique filename
-    const uniqueId = crypto.randomUUID();
-    const originalName = file.name;
-    const extension = path.extname(originalName);
-    const fileName = `${uniqueId}${extension}`;
-    
-    const filePath = path.join(uploadDir, fileName);
-
-    await writeFile(filePath, buffer);
-
-    return NextResponse.json({ url: `/uploads/${fileName}` });
+    const data = (await res.json()) as { secure_url: string };
+    return NextResponse.json({ url: data.secure_url });
   } catch (error) {
-    console.error("Upload error:", error);
+    console.error("Upload route error:", error);
     return NextResponse.json(
       { error: "Failed to upload file" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

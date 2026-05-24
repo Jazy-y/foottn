@@ -18,6 +18,7 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "images.unsplash.com" },
       { protocol: "https", hostname: "firebasestorage.googleapis.com" },
       { protocol: "https", hostname: "footy-99dd4.firebasestorage.app" },
+      { protocol: "https", hostname: "res.cloudinary.com" },
     ],
     // Serve modern formats automatically (WebP/AVIF) — free perf win on Vercel
     formats: ["image/avif", "image/webp"],

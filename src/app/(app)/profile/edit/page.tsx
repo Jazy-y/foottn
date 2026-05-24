@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { updateUserProfile } from "@/services/db";
 import { updateProfile } from "firebase/auth";
+import { uploadToCloudinary } from "@/lib/cloudinary";
 import { toast } from "sonner";
 import type { Position, SkillLevel } from "@/types";
 
@@ -79,12 +80,7 @@ export default function ProfileEditPage() {
     if (!avatarFile) return null;
     setUploadingAvatar(true);
     try {
-      const formData = new FormData();
-      formData.append("file", avatarFile);
-      const res = await fetch("/api/upload", { method: "POST", body: formData });
-      if (!res.ok) throw new Error("Échec du téléchargement");
-      const data = await res.json();
-      return data.url as string;
+      return await uploadToCloudinary(avatarFile, "foottn/avatars");
     } finally {
       setUploadingAvatar(false);
     }

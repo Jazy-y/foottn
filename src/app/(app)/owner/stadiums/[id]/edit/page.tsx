@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { AuthGuard } from "@/components/layout/AuthGuard";
 import { GlassCard } from "@/components/ui/glass-card";
 import { getStadiumById, updateStadium } from "@/services/db";
+import { uploadToCloudinary } from "@/lib/cloudinary";
 
 export default function EditOwnerStadiumPage() {
   const params = useParams();
@@ -36,20 +37,7 @@ export default function EditOwnerStadiumPage() {
 
     try {
       if (file) {
-        const formData = new FormData();
-        formData.append("file", file);
-
-        const uploadRes = await fetch("/api/upload", {
-          method: "POST",
-          body: formData,
-        });
-
-        if (uploadRes.ok) {
-          const { url } = await uploadRes.json();
-          imageUrl = url;
-        } else {
-          console.error("Failed to upload image");
-        }
+        imageUrl = await uploadToCloudinary(file, "foottn/stadiums");
       }
 
       await updateStadium(id, {
