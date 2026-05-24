@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { AuthGuard } from "@/components/layout/AuthGuard";
 import { GlassCard } from "@/components/ui/glass-card";
 import { GradientText } from "@/components/ui/gradient-text";
-import { deleteStadium, getAllStadiums, listAllUsers, updateStadium } from "@/services/db";
+import { deleteStadium, getAllStadiumsAdmin, listAllUsers, updateStadium } from "@/services/db";
 import type { Stadium } from "@/types";
 import { MapPin, Image as ImageIcon, Trash2, User, Calendar, Info, ShieldAlert, CheckCircle, XCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -19,7 +19,7 @@ export default function AdminStadiumsPage() {
     setLoading(true);
     try {
       const [stadiums, users] = await Promise.all([
-        getAllStadiums(),
+        getAllStadiumsAdmin(),
         listAllUsers()
       ]);
       setItems(stadiums);

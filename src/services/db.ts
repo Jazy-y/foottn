@@ -115,6 +115,15 @@ export const getAllStadiums = async () => {
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Stadium);
 };
 
+// Admin-only query — returns ALL stadiums regardless of approval status.
+// Firestore rules allow admins to read every document.
+export const getAllStadiumsAdmin = async () => {
+  const snap = await getDocs(
+    query(collection(db, "stadiums"), orderBy("createdAt", "desc")),
+  );
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Stadium);
+};
+
 export const getStadiumsByOwner = async (ownerId: string) => {
   const snap = await getDocs(
     query(collection(db, "stadiums"), where("ownerId", "==", ownerId)),
