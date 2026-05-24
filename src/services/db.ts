@@ -97,7 +97,7 @@ export const createStadium = async (
   data: Omit<Stadium, "id" | "createdAt">,
 ) => {
   const ref = doc(collection(db, "stadiums"));
-  await setDoc(ref, { ...data, id: ref.id, createdAt: ts() });
+  await setDoc(ref, { ...data, id: ref.id, approved: false, createdAt: ts() });
   return ref.id;
 };
 
@@ -107,8 +107,11 @@ export const deleteStadium = (id: string) =>
 export const updateStadium = (id: string, data: Partial<Stadium>) =>
   updateDoc(doc(db, "stadiums", id), data);
 
+// Public-facing query — only returns approved stadiums (no auth required).
 export const getAllStadiums = async () => {
-  const snap = await getDocs(query(collection(db, "stadiums")));
+  const snap = await getDocs(
+    query(collection(db, "stadiums"), where("approved", "==", true)),
+  );
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Stadium);
 };
 
@@ -717,11 +720,12 @@ export const getUserEventsCount = async (userId: string): Promise<number> => {
   return snap.size;
 };
 
+// Admin-only query — returns stadiums pending approval (approved == false).
 export const getPendingStadiums = async (): Promise<Stadium[]> => {
-  const snap = await getDocs(collection(db, "stadiums"));
-  return snap.docs
-    .map((d) => ({ id: d.id, ...d.data() } as Stadium))
-    .filter((s) => !s.approved);
+  const snap = await getDocs(
+    query(collection(db, "stadiums"), where("approved", "==", false)),
+  );
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() } as Stadium));
 };
 
 export const getOpenTicketsCount = async (): Promise<number> => {

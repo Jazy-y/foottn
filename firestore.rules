@@ -56,7 +56,12 @@ service cloud.firestore {
     // STADIUMS
     // =============================================================================
     match /stadiums/{stadiumId} {
-      allow read: if signedIn();
+      // Approved stadiums are publicly visible (no auth required).
+      // An owner can always read their own stadiums (pending or approved).
+      // Admins can read everything.
+      allow read: if resource.data.approved == true
+        || (signedIn() && resource.data.ownerId == request.auth.uid)
+        || isAdmin();
 
       // Owners cannot self-approve — approved must be absent or false on create.
       allow create: if signedIn() &&

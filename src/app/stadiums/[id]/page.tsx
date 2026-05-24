@@ -13,6 +13,7 @@ import {
   Info,
   ShieldCheck,
   Clock,
+  Building2,
 } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { GlassCard } from "@/components/ui/glass-card";
@@ -22,64 +23,24 @@ import { BookingWidget } from "@/components/booking/BookingWidget";
 import { getStadiumById } from "@/services/db";
 import { Stadium } from "@/types";
 
-const MOCK_STADIUMS: Record<string, Stadium> = {
-  mock1: {
-    id: "mock1",
-    ownerId: "owner1",
-    name: "Oasis Arena",
-    description:
-      "Un terrain intérieur 5v5 premium avec gazon synthétique de haute qualité. Équipé d'une climatisation de pointe, de douches de luxe et d'un salon d'attente pour les joueurs. Parfait pour les ligues compétitives ou les matchs amicaux.",
-    location: "Centre-ville · Metro City",
-    pricePerHour: 50,
-    features: ["5v5", "Intérieur", "Douches", "Parking", "Salon", "Distributeur"],
-    images: [
-      "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?q=80&w=1600&auto=format&fit=crop",
-    ],
-    createdAt: null as never,
-  },
-  mock2: {
-    id: "mock2",
-    ownerId: "owner2",
-    name: "Neon Kickers",
-    description:
-      "Stade extérieur 7v7 avec éclairage néon pour les matchs nocturnes, tribune pour les spectateurs et tableau d'affichage en direct.",
-    location: "Complexe sportif Est",
-    pricePerHour: 80,
-    features: ["7v7", "Extérieur", "Éclairage", "Café", "Score"],
-    images: [
-      "https://images.unsplash.com/photo-1518605368461-1ee1ea3e9c60?q=80&w=1600&auto=format&fit=crop",
-    ],
-    createdAt: null as never,
-  },
-  mock3: {
-    id: "mock3",
-    ownerId: "owner3",
-    name: "The Grand Pitch",
-    description:
-      "Terrain complet 11v11 avec gazon standard UEFA, tournois professionnels et arbitres certifiés sur demande.",
-    location: "Collines Nord",
-    pricePerHour: 150,
-    features: ["11v11", "Gazon", "Vestiaires", "Arbitres"],
-    images: [
-      "https://images.unsplash.com/photo-1504450758481-7338eba7524a?q=80&w=1600&auto=format&fit=crop",
-    ],
-    createdAt: null as never,
-  },
-};
-
 export default function StadiumDetailsPage() {
   const params = useParams();
   const id = params.id as string;
   const [stadium, setStadium] = useState<Stadium | null>(null);
   const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
     async function load() {
       try {
         const data = await getStadiumById(id);
-        setStadium(data ?? MOCK_STADIUMS[id] ?? MOCK_STADIUMS.mock1);
+        if (!data || data.approved === false) {
+          setNotFound(true);
+        } else {
+          setStadium(data);
+        }
       } catch {
-        setStadium(MOCK_STADIUMS[id] ?? MOCK_STADIUMS.mock1);
+        setNotFound(true);
       } finally {
         setLoading(false);
       }
@@ -99,7 +60,31 @@ export default function StadiumDetailsPage() {
     );
   }
 
-  if (!stadium) return null;
+  if (notFound || !stadium) {
+    return (
+      <div className="min-h-screen text-foreground">
+        <Navbar />
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-32 pb-20 flex flex-col items-center justify-center text-center gap-4">
+          <div className="grid h-16 w-16 place-items-center rounded-2xl bg-white/[0.03] border border-white/[0.06]">
+            <Building2 className="h-7 w-7 text-muted-foreground/40" />
+          </div>
+          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+            stade introuvable
+          </p>
+          <p className="font-mono text-xs text-muted-foreground/60 max-w-sm">
+            Ce stade n&apos;existe pas ou n&apos;est pas encore disponible.
+          </p>
+          <Link
+            href="/stadiums"
+            className="mt-2 inline-flex items-center gap-1.5 font-mono text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ChevronLeft className="h-3.5 w-3.5" />
+            retour à l&apos;explorateur
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen text-foreground">
