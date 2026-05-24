@@ -96,9 +96,28 @@ export function proxy(request: NextRequest) {
   return NextResponse.next();
 }
 
-// Only run on pages — skip static files, images, and API routes.
+// Only run on real navigations — skip static files, images, API routes,
+// and Next.js prefetch requests.
+//
+// WHY exclude prefetch requests:
+// Next.js prefetches <Link> hrefs in the background, before Firebase Auth
+// has finished restoring the session and writing the __footy_session cookie.
+// If the proxy intercepts a prefetch to /feed with no cookie, it returns a
+// redirect to /login which Next.js caches. The user then gets sent to /login
+// even though they are authenticated — the cached redirect fires instead of
+// the real navigation check. Excluding prefetches means the proxy only runs
+// when the user actually clicks, by which time the cookie is always set.
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon\\.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff2?|ttf|otf|css|js|map)|api/).*)",
+    {
+      source:
+        "/((?!_next/static|_next/image|favicon\\.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff2?|ttf|otf|css|js|map)|api/).*)",
+      missing: [
+        // Skip RSC prefetch requests (App Router)
+        { type: "header", key: "next-router-prefetch" },
+        // Skip browser-level prefetch requests
+        { type: "header", key: "purpose", value: "prefetch" },
+      ],
+    },
   ],
 };

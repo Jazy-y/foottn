@@ -37,13 +37,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         setAppUser(resolvedProfile);
 
-        // ── Set session cookies for Edge Middleware ──────────────────────────
+        // ── Set session cookies for Edge Proxy ───────────────────────────────
         // These are soft cookies used ONLY for server-side route gating.
         // Real security stays in Firestore rules + <AuthGuard> Firebase checks.
-        const maxAge = 60 * 60; // 1 hour — matches Firebase ID token lifetime
-        document.cookie = `__footy_session=1; path=/; max-age=${maxAge}; SameSite=Strict`;
+        //
+        // max-age: 7 days — Firebase sessions persist until explicit sign-out;
+        //   1 hour was too short and caused valid sessions to lose their cookie.
+        // Secure: required in production so the cookie is HTTPS-only.
+        // SameSite=Strict: prevents CSRF; cookie is only sent for same-site nav.
+        const maxAge = 7 * 24 * 60 * 60; // 7 days
+        const secure = location.protocol === "https:" ? "; Secure" : "";
+        document.cookie = `__footy_session=1; path=/; max-age=${maxAge}; SameSite=Strict${secure}`;
         if (resolvedProfile?.role) {
-          document.cookie = `__footy_role=${resolvedProfile.role}; path=/; max-age=${maxAge}; SameSite=Strict`;
+          document.cookie = `__footy_role=${resolvedProfile.role}; path=/; max-age=${maxAge}; SameSite=Strict${secure}`;
         }
       } else {
         setAppUser(null);
