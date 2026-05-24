@@ -444,7 +444,12 @@ export const getRecentPosts = async (max = 50) => {
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Post);
 };
 
-export const togglePostLike = async (postId: string, userId: string, userName?: string) => {
+export const togglePostLike = async (
+  postId: string,
+  userId: string,
+  userName?: string,
+  userPhoto?: string,
+) => {
   const ref = doc(db, "posts", postId);
   const snap = await getDoc(ref);
   if (!snap.exists()) return;
@@ -461,7 +466,10 @@ export const togglePostLike = async (postId: string, userId: string, userName?: 
       type: "SYSTEM",
       title: "Nouveau J'aime ❤️",
       body: `${userName || "Quelqu'un"} a aimé votre publication.`,
-      href: "/feed"
+      href: "/feed",
+      actorId: userId,
+      actorName: userName,
+      ...(userPhoto ? { actorPhoto: userPhoto } : {}),
     });
   }
 };
@@ -526,7 +534,10 @@ export const addComment = async (
         type: "SYSTEM",
         title: "Nouveau Commentaire 💬",
         body: `${data.authorName} a commenté votre publication.`,
-        href: "/feed"
+        href: "/feed",
+        actorId: data.authorId,
+        actorName: data.authorName,
+        ...(data.authorPhoto ? { actorPhoto: data.authorPhoto } : {}),
       });
     }
   }

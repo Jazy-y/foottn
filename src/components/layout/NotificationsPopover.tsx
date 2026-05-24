@@ -27,6 +27,54 @@ const typeIcon: Record<NotificationType, React.ElementType> = {
   SYSTEM: Sparkles,
 };
 
+// ── Avatar with a small type-icon badge ────────────────────────────────────────
+function NotificationAvatar({ n }: { n: AppNotification }) {
+  const Icon = typeIcon[n.type] ?? Sparkles;
+
+  // Real photo from the actor (liker / commenter)
+  if (n.actorPhoto) {
+    return (
+      <div className="relative shrink-0">
+        <img
+          src={n.actorPhoto}
+          alt={n.actorName ?? ""}
+          className="h-9 w-9 rounded-full object-cover ring-1 ring-white/10"
+        />
+        <span className="absolute -bottom-0.5 -right-0.5 h-4 w-4 rounded-full bg-background border border-white/10 grid place-items-center">
+          <Icon className="h-2.5 w-2.5 text-primary" />
+        </span>
+      </div>
+    );
+  }
+
+  // Initials fallback when we know the name but have no photo
+  if (n.actorName) {
+    const initials = n.actorName
+      .split(" ")
+      .map((w) => w[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+    return (
+      <div className="relative shrink-0">
+        <div className="h-9 w-9 rounded-full bg-primary/15 flex items-center justify-center font-mono text-[11px] font-bold text-primary ring-1 ring-white/10">
+          {initials}
+        </div>
+        <span className="absolute -bottom-0.5 -right-0.5 h-4 w-4 rounded-full bg-background border border-white/10 grid place-items-center">
+          <Icon className="h-2.5 w-2.5 text-primary" />
+        </span>
+      </div>
+    );
+  }
+
+  // Generic icon for system / non-actor notifications
+  return (
+    <div className="hairline shrink-0 grid h-9 w-9 place-items-center rounded-xl bg-card">
+      <Icon className="h-3.5 w-3.5 text-primary" />
+    </div>
+  );
+}
+
 function getDate(t: AppNotification["createdAt"] | undefined): Date | null {
   if (!t) return null;
   if (t instanceof Date) return t;
@@ -98,7 +146,6 @@ export function NotificationsPopover() {
             </div>
           ) : (
             items.map((n) => {
-              const Icon = typeIcon[n.type] ?? Sparkles;
               const date = getDate(n.createdAt);
               return (
                 <Link
@@ -109,9 +156,7 @@ export function NotificationsPopover() {
                     !n.read ? "bg-primary/[0.03]" : ""
                   }`}
                 >
-                  <div className="hairline shrink-0 grid h-8 w-8 place-items-center rounded-lg bg-card">
-                    <Icon className="h-3.5 w-3.5 text-primary" />
-                  </div>
+                  <NotificationAvatar n={n} />
                   <div className="flex-1 min-w-0">
                     <div className="font-mono text-xs font-medium truncate">
                       {n.title}

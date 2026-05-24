@@ -238,6 +238,12 @@ export interface AppNotification {
   href?: string;
   read: boolean;
   createdAt: FsTimestamp;
+  /** UID of the user who triggered this notification (liker, commenter, etc.) */
+  actorId?: string;
+  /** Display name of the actor — used for initials fallback */
+  actorName?: string;
+  /** Avatar URL of the actor — shown instead of the generic type icon */
+  actorPhoto?: string;
 }
 
 // =============================================================================

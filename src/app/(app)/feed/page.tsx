@@ -289,7 +289,7 @@ export default function FeedPage() {
       ...p, likes: Math.max(0, (p.likes ?? 0) + (liked ? -1 : 1)),
       likedBy: liked ? (p.likedBy ?? []).filter((id) => id !== user.uid) : [...(p.likedBy ?? []), user.uid],
     }));
-    try { await togglePostLike(post.id, user.uid, user.displayName || user.email || undefined); }
+    try { await togglePostLike(post.id, user.uid, user.displayName || user.email || undefined, user.photoURL ?? undefined); }
     catch { toast.error("Impossible de mettre à jour le j'aime"); }
   };
 
