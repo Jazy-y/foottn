@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { MapPin, Star, Search, ArrowUpRight } from "lucide-react";
+import { MapPin, Search, ArrowUpRight, Building2 } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { GlassCard } from "@/components/ui/glass-card";
 import { GradientText } from "@/components/ui/gradient-text";
@@ -12,92 +12,6 @@ import { Input } from "@/components/ui/input";
 import { getAllStadiums } from "@/services/db";
 import { Stadium } from "@/types";
 
-const MOCK_STADIUMS: Stadium[] = [
-  {
-    id: "mock1",
-    ownerId: "owner1",
-    name: "Oasis Arena",
-    description:
-      "Un terrain intérieur 5v5 premium avec gazon synthétique de haute qualité, climatisation et douches de luxe.",
-    location: "Centre-ville · Metro City",
-    pricePerHour: 50,
-    features: ["5v5", "Intérieur", "Douches", "Parking"],
-    images: [
-      "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?q=80&w=1200&auto=format&fit=crop",
-    ],
-    createdAt: null as never,
-  },
-  {
-    id: "mock2",
-    ownerId: "owner2",
-    name: "Neon Kickers",
-    description:
-      "Stade extérieur 7v7 avec néons pour les matchs nocturnes et tableau d'affichage en direct.",
-    location: "Complexe sportif Est",
-    pricePerHour: 80,
-    features: ["7v7", "Extérieur", "Éclairage", "Café"],
-    images: [
-      "https://images.unsplash.com/photo-1518605368461-1ee1ea3e9c60?q=80&w=1200&auto=format&fit=crop",
-    ],
-    createdAt: null as never,
-  },
-  {
-    id: "mock3",
-    ownerId: "owner3",
-    name: "The Grand Pitch",
-    description:
-      "Terrain complet 11v11 avec gazon standard UEFA, parfait pour les tournois.",
-    location: "Collines Nord",
-    pricePerHour: 150,
-    features: ["11v11", "Gazon", "Vestiaires", "Arbitres"],
-    images: [
-      "https://images.unsplash.com/photo-1504450758481-7338eba7524a?q=80&w=1200&auto=format&fit=crop",
-    ],
-    createdAt: null as never,
-  },
-  {
-    id: "mock4",
-    ownerId: "owner4",
-    name: "SkyDeck Pitch",
-    description:
-      "Gazon hybride sur le toit avec vue sur la ville, expérience nocturne premium.",
-    location: "Quartier de la Marina",
-    pricePerHour: 120,
-    features: ["5v5", "Toit", "Bar", "Salon"],
-    images: [
-      "https://images.unsplash.com/photo-1577471488278-16eec37ffcc2?q=80&w=1200&auto=format&fit=crop",
-    ],
-    createdAt: null as never,
-  },
-  {
-    id: "mock5",
-    ownerId: "owner5",
-    name: "Iron Pitch",
-    description:
-      "Cage 7v7 à l'ambiance industrielle avec toit couvert, populaire pour les ligues de nuit.",
-    location: "Vieux Port",
-    pricePerHour: 95,
-    features: ["7v7", "Couvert", "Éclairage", "Spectateurs"],
-    images: [
-      "https://images.unsplash.com/photo-1556056504-5c7696c4c28d?q=80&w=1200&auto=format&fit=crop",
-    ],
-    createdAt: null as never,
-  },
-  {
-    id: "mock6",
-    ownerId: "owner6",
-    name: "Atlas Arena",
-    description:
-      "Intérieur 5v5 climatisé avec salles de coaching pro et caméras d'analyse.",
-    location: "Quartier chic",
-    pricePerHour: 110,
-    features: ["5v5", "Intérieur", "Caméras IA", "Douches"],
-    images: [
-      "https://images.unsplash.com/photo-1543351611-58f69d7c1781?q=80&w=1200&auto=format&fit=crop",
-    ],
-    createdAt: null as never,
-  },
-];
 
 export default function StadiumsPage() {
   const [stadiums, setStadiums] = useState<Stadium[]>([]);
@@ -109,10 +23,8 @@ export default function StadiumsPage() {
 
   useEffect(() => {
     getAllStadiums()
-      .then((data) => {
-        setStadiums(data.length ? data : MOCK_STADIUMS);
-      })
-      .catch(() => setStadiums(MOCK_STADIUMS))
+      .then(setStadiums)
+      .catch(() => setStadiums([]))
       .finally(() => setLoading(false));
   }, []);
 
@@ -234,9 +146,12 @@ export default function StadiumsPage() {
             ))}
           </div>
         ) : filtered.length === 0 ? (
-          <GlassCard className="p-16 text-center">
+          <GlassCard className="p-16 text-center space-y-3">
+            <Building2 className="h-10 w-10 text-muted-foreground/20 mx-auto" />
             <p className="font-mono text-sm text-muted-foreground">
-              Aucun stade ne correspond à votre recherche.
+              {stadiums.length === 0
+                ? "Aucun stade disponible pour le moment."
+                : "Aucun stade ne correspond à votre recherche."}
             </p>
           </GlassCard>
         ) : (
@@ -249,7 +164,7 @@ export default function StadiumsPage() {
             }}
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
           >
-            {filtered.map((stadium, i) => (
+            {filtered.map((stadium) => (
               <motion.div
                 key={stadium.id}
                 variants={{
@@ -267,17 +182,13 @@ export default function StadiumsPage() {
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
-                      <div className="absolute top-3 left-3 flex items-center gap-1.5 rounded-full border border-white/[0.10] bg-black/40 backdrop-blur-md px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-foreground">
-                        <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-                        4.{8 + (i % 2)}
-                      </div>
                       <div className="absolute top-3 right-3 inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 backdrop-blur-md px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-emerald-300">
                         <LiveDot variant="online" />
                         en direct
                       </div>
                       <div className="absolute bottom-3 left-3 right-3">
                         <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-1">
-                          / lieu · {String(i + 1).padStart(3, "0")}
+                          / stade
                         </div>
                         <h3 className="font-mono text-xl font-medium text-foreground">
                           {stadium.name}
