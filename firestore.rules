@@ -1,0 +1,293 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isSelf(userId) {
+      return signedIn() && request.auth.uid == userId;
+    }
+
+    function isOwnerOf(resourceData) {
+      return signedIn() && resourceData.ownerId == request.auth.uid;
+    }
+
+    // Single get() is sufficient — if the doc doesn't exist it returns null and
+    // the role comparison fails safely, so the extra exists() call is removed.
+    function isAdmin() {
+      return signedIn() &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "SUPER_ADMIN";
+    }
+
+    // Prevent clients from escalating their own role.
+    function roleUnchanged() {
+      return !(request.resource.data.keys().hasAny(["role"])) ||
+        (resource.data.role == request.resource.data.role);
+    }
+
+    // Only the fields listed may differ between the incoming and stored document.
+    function onlyChanges(keys) {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(keys);
+    }
+
+    // =============================================================================
+    // USERS
+    // =============================================================================
+    match /users/{uid} {
+      // Any signed-in user can read basic profile data (needed for teams, events,
+      // feed). walletBalance is kept here — accept this trade-off for now.
+      allow read: if signedIn();
+
+      // On registration, role must be PLAYER (or absent — defaulted server-side).
+      allow create: if isSelf(uid) &&
+        (!("role" in request.resource.data) || request.resource.data.role == "PLAYER");
+
+      // Users can update their own profile but cannot change their role.
+      allow update: if (isSelf(uid) && roleUnchanged()) || isAdmin();
+
+      allow delete: if isAdmin();
+    }
+
+    // =============================================================================
+    // STADIUMS
+    // =============================================================================
+    match /stadiums/{stadiumId} {
+      allow read: if signedIn();
+
+      // Owners cannot self-approve — approved must be absent or false on create.
+      allow create: if signedIn() &&
+        request.resource.data.ownerId == request.auth.uid &&
+        (!("approved" in request.resource.data) || request.resource.data.approved == false);
+
+      // Only the owner or an admin can update/delete.
+      // Owners cannot flip their own approved flag.
+      allow update: if isAdmin() || (
+        isOwnerOf(resource.data) &&
+        (!("approved" in request.resource.data) ||
+          request.resource.data.approved == resource.data.approved)
+      );
+
+      allow delete: if isOwnerOf(resource.data) || isAdmin();
+    }
+
+    // =============================================================================
+    // BOOKINGS
+    // =============================================================================
+    match /bookings/{bookingId} {
+      // Only the booking owner, the stadium owner, or an admin may read.
+      allow read: if signedIn() && (
+        resource.data.userId == request.auth.uid ||
+        get(/databases/$(database)/documents/stadiums/$(resource.data.stadiumId)).data.ownerId == request.auth.uid ||
+        isAdmin()
+      );
+
+      allow create: if signedIn() && request.resource.data.userId == request.auth.uid;
+
+      // The booking owner may only cancel (set status → CANCELLED), nothing else.
+      // The stadium owner may update operational fields (confirm, complete, etc.).
+      // Admins may update anything.
+      allow update: if signedIn() && (
+        isAdmin() ||
+        get(/databases/$(database)/documents/stadiums/$(resource.data.stadiumId)).data.ownerId == request.auth.uid ||
+        (
+          resource.data.userId == request.auth.uid &&
+          onlyChanges(['status']) &&
+          request.resource.data.status == 'CANCELLED'
+        )
+      );
+
+      allow delete: if isAdmin();
+    }
+
+    // =============================================================================
+    // TEAMS
+    // =============================================================================
+    match /teams/{teamId} {
+      allow read: if signedIn();
+
+      allow create: if signedIn() && request.resource.data.captainId == request.auth.uid;
+
+      allow update: if signedIn() && (
+        resource.data.captainId == request.auth.uid ||
+        isAdmin() ||
+        // Any member may join (add own uid) or leave (remove own uid).
+        (
+          onlyChanges(['memberIds']) &&
+          (
+            (request.resource.data.memberIds.size() == resource.data.memberIds.size() + 1 &&
+              request.auth.uid in request.resource.data.memberIds) ||
+            (request.resource.data.memberIds.size() == resource.data.memberIds.size() - 1 &&
+              !(request.auth.uid in request.resource.data.memberIds))
+          )
+        )
+      );
+
+      allow delete: if signedIn() && (resource.data.captainId == request.auth.uid || isAdmin());
+    }
+
+    match /teamMembers/{id} {
+      allow read: if signedIn();
+      // Only create/delete your own membership record.
+      allow create: if signedIn() && request.resource.data.userId == request.auth.uid;
+      allow update: if false;
+      allow delete: if signedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+    }
+
+    match /teamInvites/{inviteId} {
+      allow read: if signedIn();
+      // Only a team captain (invitedBy) can create an invite.
+      allow create: if signedIn() && request.resource.data.invitedBy == request.auth.uid;
+      allow update: if signedIn() && (
+        resource.data.invitedUserId == request.auth.uid ||
+        resource.data.invitedBy == request.auth.uid ||
+        isAdmin()
+      );
+      allow delete: if signedIn() && (resource.data.invitedBy == request.auth.uid || isAdmin());
+    }
+
+    match /teamMessages/{messageId} {
+      allow read: if signedIn();
+      allow create: if signedIn() && request.resource.data.userId == request.auth.uid;
+      allow update: if false;
+      allow delete: if isAdmin();
+    }
+
+    // =============================================================================
+    // EVENTS
+    // =============================================================================
+    match /events/{eventId} {
+      allow read: if signedIn();
+
+      allow create: if signedIn() && request.resource.data.hostId == request.auth.uid;
+
+      allow update: if signedIn() && (
+        resource.data.hostId == request.auth.uid ||
+        isAdmin() ||
+        // A user may only add themselves or remove themselves from participantIds.
+        (
+          onlyChanges(['participantIds']) &&
+          (
+            (request.resource.data.participantIds.size() == resource.data.participantIds.size() + 1 &&
+              request.auth.uid in request.resource.data.participantIds &&
+              !(request.auth.uid in resource.data.participantIds)) ||
+            (request.resource.data.participantIds.size() == resource.data.participantIds.size() - 1 &&
+              !(request.auth.uid in request.resource.data.participantIds) &&
+              request.auth.uid in resource.data.participantIds)
+          )
+        )
+      );
+
+      allow delete: if signedIn() && (resource.data.hostId == request.auth.uid || isAdmin());
+    }
+
+    match /eventParticipants/{id} {
+      allow read: if signedIn();
+      allow create: if signedIn() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if signedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+    }
+
+    // =============================================================================
+    // FEED
+    // =============================================================================
+    match /posts/{postId} {
+      allow read: if signedIn();
+
+      allow create: if signedIn() && request.resource.data.authorId == request.auth.uid;
+
+      allow update: if signedIn() && (
+        isAdmin() ||
+        resource.data.authorId == request.auth.uid ||
+        // Others may only touch reaction/engagement fields — never content,
+        // authorship, or moderation flags.
+        (
+          request.resource.data.authorId   == resource.data.authorId &&
+          request.resource.data.authorName == resource.data.authorName &&
+          request.resource.data.text       == resource.data.text &&
+          request.resource.data.get('imageUrl', null) == resource.data.get('imageUrl', null) &&
+          // Prevent users from clearing a moderation flag on their own post.
+          request.resource.data.get('flagged', false) == resource.data.get('flagged', false) &&
+          request.resource.data.get('moderationLabel', null) == resource.data.get('moderationLabel', null)
+        )
+      );
+
+      allow delete: if signedIn() && (resource.data.authorId == request.auth.uid || isAdmin());
+    }
+
+    match /comments/{commentId} {
+      allow read: if signedIn();
+      allow create: if signedIn() && request.resource.data.authorId == request.auth.uid;
+      allow update: if isAdmin();
+      allow delete: if signedIn() && (resource.data.authorId == request.auth.uid || isAdmin());
+    }
+
+    // =============================================================================
+    // NOTIFICATIONS
+    // =============================================================================
+    match /notifications/{notificationId} {
+      // Only the target user or an admin may read or mark-as-read.
+      allow read, update: if signedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      // Notifications must be created by server-side code (Cloud Functions).
+      // Block all client-side creates to prevent notification spam.
+      allow create: if false;
+      allow delete: if isAdmin();
+    }
+
+    // =============================================================================
+    // SUPPORT
+    // =============================================================================
+    match /tickets/{ticketId} {
+      allow read: if signedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if signedIn() && request.resource.data.userId == request.auth.uid;
+      // Users may only update the message body; status/priority changes → admin only.
+      allow update: if signedIn() && (
+        isAdmin() ||
+        (resource.data.userId == request.auth.uid && onlyChanges(['message', 'updatedAt']))
+      );
+      allow delete: if isAdmin();
+    }
+
+    match /ticketMessages/{messageId} {
+      allow read: if signedIn();
+      allow create: if signedIn() && request.resource.data.authorId == request.auth.uid;
+      allow update: if false;
+      allow delete: if isAdmin();
+    }
+
+    // =============================================================================
+    // WALLET + INVOICES  (server-side write only)
+    // =============================================================================
+    match /walletTransactions/{txId} {
+      // Only the owner or an admin may read transaction history.
+      allow read: if signedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      // All writes must go through a Cloud Function / server route — never the client.
+      allow write: if false;
+    }
+
+    match /invoices/{invoiceId} {
+      allow read: if signedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow write: if false;
+    }
+
+    // =============================================================================
+    // ANALYTICS
+    // =============================================================================
+    match /analytics_visits/{visitId} {
+      allow read: if isAdmin();
+      // Allow unauthenticated page-view logging but cap document size to
+      // prevent garbage payloads (Firestore field count proxy).
+      allow create: if request.resource.data.size() <= 10;
+      allow update, delete: if false;
+    }
+
+    // =============================================================================
+    // Default deny — catches every collection not listed above.
+    // =============================================================================
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

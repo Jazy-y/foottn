@@ -30,8 +30,23 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# env files — never commit secrets
+.env
+.env.local
+.env.*.local
+# .env.example is safe to commit (no real values)
+
+# Personal / project docs — not part of the app
+*.docx
+*.pdf
+footadmin.txt
+features.txt
+
+# Claude Code session data
+.claude/
+
+# Uploaded user content (stored in Firebase Storage, not git)
+public/uploads/
 
 # vercel
 .vercel
