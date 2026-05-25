@@ -28,7 +28,9 @@ export async function POST(req: NextRequest) {
       amount: amountInCents,
       currency,
       metadata,
-      automatic_payment_methods: { enabled: true },
+      // Card-only: avoids redirect-based methods (Bancontact, EPS, etc.)
+      // that conflict with redirect:"if_required" on the client.
+      payment_method_types: ["card"],
     });
 
     return NextResponse.json({ clientSecret: paymentIntent.client_secret });

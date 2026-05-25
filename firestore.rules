@@ -280,8 +280,14 @@ service cloud.firestore {
     match /walletTransactions/{txId} {
       // Only the owner or an admin may read transaction history.
       allow read: if signedIn() && (resource.data.userId == request.auth.uid || isAdmin());
-      // All writes must go through a Cloud Function / server route — never the client.
-      allow write: if false;
+      // Users may create their own wallet transactions (Stripe top-ups and
+      // booking deductions happen client-side; no Cloud Functions available).
+      // Guards: must target themselves, amount must be positive.
+      allow create: if signedIn() &&
+        request.resource.data.userId == request.auth.uid &&
+        request.resource.data.amount > 0;
+      // No client-side edits or deletes.
+      allow update, delete: if isAdmin();
     }
 
     match /invoices/{invoiceId} {
