@@ -401,13 +401,13 @@ export const joinEvent = async (
   if (snap.exists()) {
     const data = snap.data() as SportEvent;
     if (data.hostId !== participant.userId) {
-      await createNotification({
+      createNotification({
         userId: data.hostId,
         type: "EVENT",
         title: "Nouveau Participant 🏃",
         body: `${participant.userName} a rejoint votre événement "${data.title}".`,
         href: `/events/${eventId}`
-      });
+      }).catch(() => {});
     }
   }
 };
@@ -473,7 +473,8 @@ export const togglePostLike = async (
   });
 
   if (!liked && data.authorId !== userId) {
-    await createNotification({
+    // Notification is fire-and-forget — never let it break the like action
+    createNotification({
       userId: data.authorId,
       type: "SYSTEM",
       title: "Nouveau J'aime ❤️",
@@ -482,7 +483,7 @@ export const togglePostLike = async (
       actorId: userId,
       actorName: userName,
       ...(userPhoto ? { actorPhoto: userPhoto } : {}),
-    });
+    }).catch(() => {});
   }
 };
 
@@ -496,13 +497,13 @@ export const flagPost = async (postId: string, reason?: string) => {
   
   if (snap.exists()) {
     const data = snap.data() as Post;
-    await createNotification({
+    createNotification({
       userId: data.authorId,
       type: "SYSTEM",
       title: "Publication Signalée ⚠️",
       body: `Votre publication a été signalée pour la raison suivante : ${reason || "Non spécifié"}.`,
       href: "/feed"
-    });
+    }).catch(() => {});
   }
 };
 
@@ -516,12 +517,12 @@ export const deletePost = async (postId: string) => {
   const snap = await getDoc(ref);
   if (snap.exists()) {
     const data = snap.data() as Post;
-    await createNotification({
+    createNotification({
       userId: data.authorId,
       type: "SYSTEM",
       title: "Publication Supprimée 🗑️",
       body: `Une de vos publications a été supprimée par un administrateur.`,
-    });
+    }).catch(() => {});
   }
   await deleteDoc(ref);
 };
@@ -541,7 +542,8 @@ export const addComment = async (
   if (postSnap.exists()) {
     const postData = postSnap.data() as Post;
     if (postData.authorId !== data.authorId) {
-      await createNotification({
+      // Fire-and-forget — notification failure must not break the comment
+      createNotification({
         userId: postData.authorId,
         type: "SYSTEM",
         title: "Nouveau Commentaire 💬",
@@ -550,7 +552,7 @@ export const addComment = async (
         actorId: data.authorId,
         actorName: data.authorName,
         ...(data.authorPhoto ? { actorPhoto: data.authorPhoto } : {}),
-      });
+      }).catch(() => {});
     }
   }
 };

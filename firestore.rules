@@ -92,16 +92,24 @@ service cloud.firestore {
 
       allow create: if signedIn() && request.resource.data.userId == request.auth.uid;
 
-      // The booking owner may only cancel (set status → CANCELLED), nothing else.
+      // The booking owner may cancel OR confirm payment (after Stripe succeeds client-side).
       // The stadium owner may update operational fields (confirm, complete, etc.).
       // Admins may update anything.
       allow update: if signedIn() && (
         isAdmin() ||
         get(/databases/$(database)/documents/stadiums/$(resource.data.stadiumId)).data.ownerId == request.auth.uid ||
+        // Owner cancels their booking
         (
           resource.data.userId == request.auth.uid &&
           onlyChanges(['status']) &&
           request.resource.data.status == 'CANCELLED'
+        ) ||
+        // Owner marks booking as paid after successful Stripe/wallet payment
+        (
+          resource.data.userId == request.auth.uid &&
+          onlyChanges(['paymentStatus', 'paymentMethod', 'stripePaymentIntentId', 'status']) &&
+          request.resource.data.paymentStatus == 'PAID' &&
+          request.resource.data.status == 'CONFIRMED'
         )
       );
 
@@ -235,9 +243,13 @@ service cloud.firestore {
     match /notifications/{notificationId} {
       // Only the target user or an admin may read or mark-as-read.
       allow read, update: if signedIn() && (resource.data.userId == request.auth.uid || isAdmin());
-      // Notifications must be created by server-side code (Cloud Functions).
-      // Block all client-side creates to prevent notification spam.
-      allow create: if false;
+      // Any signed-in user may create a notification, but:
+      //   • read must start as false (no pre-read spam)
+      //   • userId must be a non-empty string (must target someone)
+      allow create: if signedIn() &&
+        request.resource.data.read == false &&
+        request.resource.data.userId is string &&
+        request.resource.data.userId.size() > 0;
       allow delete: if isAdmin();
     }
 
