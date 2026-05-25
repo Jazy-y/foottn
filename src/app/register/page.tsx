@@ -14,6 +14,14 @@ import {
 import { auth } from "@/lib/firebase";
 import { createUserProfile } from "@/services/db";
 import { Button } from "@/components/ui/button";
+
+/** Set the session cookie immediately so the proxy never sees a gap. */
+function setSessionCookie(role = "PLAYER") {
+  const maxAge = 7 * 24 * 60 * 60;
+  const secure = location.protocol === "https:" ? "; Secure" : "";
+  document.cookie = `__footy_session=1; path=/; max-age=${maxAge}; SameSite=Strict${secure}`;
+  document.cookie = `__footy_role=${role}; path=/; max-age=${maxAge}; SameSite=Strict${secure}`;
+}
 import { Input } from "@/components/ui/input";
 import { GlassCard } from "@/components/ui/glass-card";
 import { GradientText } from "@/components/ui/gradient-text";
@@ -41,6 +49,7 @@ export default function RegisterPage() {
         displayName: name,
         role: "PLAYER",
       });
+      setSessionCookie("PLAYER");
       toast.success("Compte créé");
       router.push("/dashboard");
     } catch (err) {
@@ -61,6 +70,7 @@ export default function RegisterPage() {
         displayName: cred.user.displayName ?? "",
         role: "PLAYER",
       });
+      setSessionCookie("PLAYER");
       toast.success("Compte créé");
       router.push("/dashboard");
     } catch (err) {

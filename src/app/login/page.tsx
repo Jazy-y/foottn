@@ -2,15 +2,17 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Sparkles, ArrowLeft, Loader2 } from "lucide-react";
 import {
   signInWithEmailAndPassword,
   GoogleAuthProvider,
   signInWithPopup,
+  User as FirebaseUser,
 } from "firebase/auth";
 import { auth } from "@/lib/firebase";
+import { getUserProfile } from "@/services/db";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { GlassCard } from "@/components/ui/glass-card";
@@ -18,19 +20,47 @@ import { GradientText } from "@/components/ui/gradient-text";
 import { LiveDot } from "@/components/ui/live-dot";
 import { toast } from "sonner";
 
+/** Set session cookies immediately so the proxy sees them before we navigate. */
+async function applySessionCookies(firebaseUser: FirebaseUser): Promise<string> {
+  const [profile, token] = await Promise.all([
+    getUserProfile(firebaseUser.uid),
+    firebaseUser.getIdTokenResult(),
+  ]);
+  const role =
+    (token.claims.role as string) || profile?.role || "PLAYER";
+
+  const maxAge = 7 * 24 * 60 * 60;
+  const secure = location.protocol === "https:" ? "; Secure" : "";
+  document.cookie = `__footy_session=1; path=/; max-age=${maxAge}; SameSite=Strict${secure}`;
+  document.cookie = `__footy_role=${role}; path=/; max-age=${maxAge}; SameSite=Strict${secure}`;
+
+  return role;
+}
+
+/** Pick the right landing page for a given role. */
+function defaultDest(role: string): string {
+  if (role === "SUPER_ADMIN") return "/admin";
+  if (role === "OWNER") return "/owner/stadiums";
+  return "/dashboard";
+}
+
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const { user } = await signInWithEmailAndPassword(auth, email, password);
+      // Set cookies BEFORE navigating so the proxy never sees a missing cookie
+      const role = await applySessionCookies(user);
       toast.success("Authentifié");
-      router.push("/dashboard");
+      const next = searchParams.get("next");
+      router.push(next ?? defaultDest(role));
     } catch (err) {
       toast.error(
         err instanceof Error ? err.message : "Échec de la connexion",
@@ -43,9 +73,11 @@ export default function LoginPage() {
   const handleGoogleLogin = async () => {
     setLoading(true);
     try {
-      await signInWithPopup(auth, new GoogleAuthProvider());
+      const { user } = await signInWithPopup(auth, new GoogleAuthProvider());
+      const role = await applySessionCookies(user);
       toast.success("Authentifié via Google");
-      router.push("/dashboard");
+      const next = searchParams.get("next");
+      router.push(next ?? defaultDest(role));
     } catch (err) {
       toast.error(
         err instanceof Error ? err.message : "Échec de la connexion avec Google",
