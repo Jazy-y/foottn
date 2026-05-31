@@ -255,7 +255,7 @@ export default function Home() {
                   Rejoindre FootTN <ArrowUpRight className="h-4 w-4" />
                 </Link>
               )}
-              <Link href="/stadiums"
+              <Link href="/stadiums" suppressHydrationWarning
                 className="hairline inline-flex items-center gap-2 rounded-full bg-card px-6 py-3 font-mono text-sm uppercase tracking-wider hover:bg-card/60 transition-colors">
                 Explorer les stades
               </Link>
@@ -429,7 +429,7 @@ export default function Home() {
           </div>
           <div className="flex items-center gap-5 font-mono text-xs uppercase tracking-wider text-muted-foreground">
             {[["Stades","/stadiums"],["Équipes","/teams"],["Événements","/events"],["Support","/support"]].map(([l,h])=>(
-              <Link key={h} href={h} className="hover:text-foreground transition-colors">{l}</Link>
+              <Link key={h} href={h} suppressHydrationWarning className="hover:text-foreground transition-colors">{l}</Link>
             ))}
           </div>
         </div>

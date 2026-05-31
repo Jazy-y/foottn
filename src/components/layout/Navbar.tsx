@@ -81,6 +81,7 @@ export function Navbar() {
                 <Link
                   key={item.href}
                   href={item.href}
+                  suppressHydrationWarning
                   className={cn(
                     "relative rounded-full px-3 py-1.5 font-mono text-xs uppercase tracking-wider transition-colors",
                     active
@@ -108,6 +109,7 @@ export function Navbar() {
               <>
                 <Link
                   href="/dashboard"
+                  suppressHydrationWarning
                   className="rounded-full border border-white/[0.06] bg-white/[0.02] px-3 py-1.5 font-mono text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground hover:border-white/[0.12] transition-colors"
                 >
                   <span className="inline-flex items-center gap-2">
@@ -117,6 +119,7 @@ export function Navbar() {
                 </Link>
                 <Link
                   href="/profile"
+                  suppressHydrationWarning
                   className="flex items-center gap-2"
                 >
                   <Avatar className="h-8 w-8 hairline">
@@ -141,12 +144,14 @@ export function Navbar() {
               <>
                 <Link
                   href="/login"
+                  suppressHydrationWarning
                   className="rounded-full px-3 py-1.5 font-mono text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Se connecter
                 </Link>
                 <Link
                   href="/register"
+                  suppressHydrationWarning
                   className="hairline relative rounded-full bg-card px-4 py-1.5 font-mono text-xs uppercase tracking-wider text-foreground transition-all hover:bg-card/70"
                 >
                   Commencer →
@@ -175,6 +180,7 @@ export function Navbar() {
               <Link
                 key={item.href}
                 href={item.href}
+                suppressHydrationWarning
                 onClick={() => setIsOpen(false)}
                 className="block rounded-lg px-3 py-2 font-mono text-sm uppercase tracking-wider text-muted-foreground hover:bg-white/[0.04] hover:text-foreground"
               >
