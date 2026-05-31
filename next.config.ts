@@ -6,6 +6,9 @@ const isDemo = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
 const nextConfig: NextConfig = {
   reactCompiler: true,
 
+  // ── Hide the Next.js dev toolbar overlay ─────────────────────────────────
+  devIndicators: false,
+
   // ── Strip console.* calls in production/demo builds ───────────────────────
   // console.log leaks internal data and slows the browser.
   compiler: {
