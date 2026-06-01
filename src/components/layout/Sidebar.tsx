@@ -11,7 +11,6 @@ import {
   MessageSquare,
   Wallet,
   LifeBuoy,
-  Settings,
   User,
   BarChart3,
   Building2,
@@ -53,7 +52,6 @@ const adminLinks: Item[] = [
 
 const bottomLinks: Item[] = [
   { label: "Profil", href: "/profile", icon: User },
-  { label: "Paramètres", href: "/settings", icon: Settings },
   { label: "Support", href: "/support", icon: LifeBuoy },
 ];
 

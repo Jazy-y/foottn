@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard, Calendar, Users, Trophy, MessageSquare,
-  Wallet, Building2, BarChart3, Shield, User, Settings,
+  Wallet, Building2, BarChart3, Shield, User,
   LifeBuoy, X, Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -41,7 +41,6 @@ const adminLinks: Item[] = [
 ];
 const bottomLinks: Item[] = [
   { label: "Profil",        href: "/profile",   icon: User     },
-  { label: "Paramètres",    href: "/settings",  icon: Settings },
   { label: "Support",       href: "/support",   icon: LifeBuoy },
 ];
 

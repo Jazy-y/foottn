@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { CheckCircle2, Circle, ShieldAlert } from "lucide-react";
 import { formatDistanceToNow, isValid } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -50,12 +49,9 @@ export function AdminSecurityCard({ appUser, data }: ProfileModuleProps) {
               {s.label}
             </span>
             {s.isHint && !s.checked && (
-              <Link
-                href="/settings"
-                className="font-mono text-[10px] uppercase tracking-wider text-primary hover:text-primary/80 transition-colors"
-              >
-                configurer →
-              </Link>
+              <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground/60">
+                bientôt
+              </span>
             )}
           </div>
         ))}

@@ -16,7 +16,6 @@ import {
   Trophy,
   MessageSquare,
   Wallet,
-  Settings,
   User as UserIcon,
   LayoutDashboard,
   Building2,
@@ -48,7 +47,6 @@ type CmdItem = { group: string; icon: React.ElementType; label: string; href: st
 
 const commonItems: CmdItem[] = [
   { group: "Compte", icon: UserIcon, label: "Profil", href: "/profile" },
-  { group: "Compte", icon: Settings, label: "Paramètres", href: "/settings" },
   { group: "Compte", icon: LifeBuoy, label: "Support", href: "/support" },
   { group: "Découvrir", icon: Building2, label: "Parcourir les stades", href: "/stadiums" },
 ];

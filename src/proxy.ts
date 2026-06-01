@@ -12,7 +12,7 @@
  *  /admin/*        → requires __footy_role = SUPER_ADMIN
  *  /owner/*        → requires __footy_role = OWNER | SUPER_ADMIN
  *  /dashboard, /profile, /bookings, /teams, /events,
- *  /feed, /wallet, /support, /settings  → requires __footy_session
+ *  /feed, /wallet, /support  → requires __footy_session
  *  /login, /register, /forgot-password  → redirect to /dashboard if already signed in
  *  everything else → public
  */
@@ -35,7 +35,6 @@ const PROTECTED_PREFIXES = [
   "/feed",
   "/wallet",
   "/support",
-  "/settings",
 ];
 
 function startsWith(path: string, prefixes: string[]) {

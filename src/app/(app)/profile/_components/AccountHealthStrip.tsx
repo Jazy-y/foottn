@@ -17,7 +17,7 @@ function buildItems(appUser: User, data: ProfileData): HealthItem[] {
     {
       label: "email vérifié",
       checked: data.emailVerified,
-      href: "/settings",
+      href: "/profile/edit",
     },
     {
       label: "photo définie",
