@@ -17,28 +17,6 @@ export default function CreateEventPage() {
   const router = useRouter();
   const { user, appUser } = useAuth();
 
-  // PLAYERs cannot create events — only OWNER and SUPER_ADMIN
-  if (appUser && appUser.role === "PLAYER") {
-    return (
-      <div className="px-4 md:px-8 py-16 max-w-md mx-auto text-center">
-        <GlassCard className="p-8 border border-amber-500/20">
-          <ShieldAlert className="h-10 w-10 text-amber-400 mx-auto mb-4" />
-          <h2 className="font-mono text-xl font-medium mb-2">Accès refusé</h2>
-          <p className="font-mono text-xs text-muted-foreground mb-6">
-            Seuls les propriétaires de stades peuvent créer des événements. Rejoignez un événement existant ou contactez un propriétaire.
-          </p>
-          <Link
-            href="/events"
-            className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 font-mono text-xs uppercase tracking-wider text-primary-foreground hover:opacity-90"
-          >
-            ← Voir les événements
-          </Link>
-        </GlassCard>
-      </div>
-    );
-  }
-
-
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
@@ -77,6 +55,28 @@ export default function CreateEventPage() {
       setSubmitting(false);
     }
   };
+
+
+  // PLAYERs cannot create events — only OWNER and SUPER_ADMIN
+  if (appUser && appUser.role === "PLAYER") {
+    return (
+      <div className="px-4 md:px-8 py-16 max-w-md mx-auto text-center">
+        <GlassCard className="p-8 border border-amber-500/20">
+          <ShieldAlert className="h-10 w-10 text-amber-400 mx-auto mb-4" />
+          <h2 className="font-mono text-xl font-medium mb-2">Accès refusé</h2>
+          <p className="font-mono text-xs text-muted-foreground mb-6">
+            Seuls les propriétaires de stades peuvent créer des événements. Rejoignez un événement existant ou contactez un propriétaire.
+          </p>
+          <Link
+            href="/events"
+            className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 font-mono text-xs uppercase tracking-wider text-primary-foreground hover:opacity-90"
+          >
+            ← Voir les événements
+          </Link>
+        </GlassCard>
+      </div>
+    );
+  }
 
   return (
     <div className="px-4 md:px-8 py-8 max-w-2xl mx-auto">
@@ -153,7 +153,7 @@ export default function CreateEventPage() {
             </div>
             <div className="space-y-1.5">
               <label className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-                coup d'envoi
+                coup d&apos;envoi
               </label>
               <Input
                 type="time"

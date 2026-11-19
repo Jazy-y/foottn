@@ -76,7 +76,7 @@ export default function StadiumsPage() {
             <div className="flex items-center gap-3 font-mono text-xs text-muted-foreground">
               <LiveDot variant="online" />
               {stadiums.length} terrains indexés · dernière synchro{" "}
-              <span className="text-foreground">à l'instant</span>
+              <span className="text-foreground">à l&apos;instant</span>
             </div>
           </div>
         </div>

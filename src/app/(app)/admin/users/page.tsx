@@ -8,7 +8,7 @@ import { listAllUsers, updateUserProfile, deleteUserProfile } from "@/services/d
 import type { User, Role } from "@/types";
 import { toast } from "sonner";
 import {
-  Trash2, Search, Users, Shield, Building2,
+  Trash2, Search, Users, Building2,
   User as UserIcon, Loader2, Crown,
 } from "lucide-react";
 import { Timestamp } from "firebase/firestore";
@@ -19,7 +19,9 @@ function toDate(t: unknown): Date | null {
   if (!t) return null;
   if (t instanceof Date) return t;
   if (t instanceof Timestamp) return t.toDate();
-  if (typeof t === "object" && (t as any).toDate) return (t as any).toDate();
+  if (typeof t === "object" && "toDate" in t && typeof t.toDate === "function") {
+    return (t as { toDate: () => Date }).toDate();
+  }
   return null;
 }
 
@@ -160,7 +162,7 @@ export default function AdminUsersPage() {
             {filtered.map((u) => {
               const cfg = ROLE_CONFIG[u.role] ?? ROLE_CONFIG.PLAYER;
               const RoleIcon = cfg.icon;
-              const createdAt = toDate((u as any).createdAt);
+              const createdAt = toDate(u.createdAt);
               const initial = (u.displayName || u.email || "?").charAt(0).toUpperCase();
               return (
                 <GlassCard key={u.id} className="p-4 flex items-center gap-4">

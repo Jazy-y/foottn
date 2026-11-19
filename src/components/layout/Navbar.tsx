@@ -12,7 +12,6 @@ import { auth } from "@/lib/firebase";
 import { signOut } from "firebase/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { LiveDot } from "@/components/ui/live-dot";
-import { GradientText } from "@/components/ui/gradient-text";
 import { cn } from "@/lib/utils";
 
 const navItems = [

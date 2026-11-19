@@ -12,7 +12,7 @@ import {
   getAllEvents, getAllStadiums, listAllUsers, getAllTeams,
   getRecentVisits, getAllBookings,
 } from "@/services/db";
-import { Users, MapPin, Calendar, Shield, Activity, TrendingUp, DollarSign, Percent } from "lucide-react";
+import { Users, MapPin, Calendar, Activity, TrendingUp, DollarSign } from "lucide-react";
 import { Timestamp } from "firebase/firestore";
 import type { Booking } from "@/types";
 
@@ -56,13 +56,15 @@ function buildMonthlyRevenue(bookings: Booking[]) {
   return Array.from(map.entries()).slice(-6).map(([date, v]) => ({ date, ...v }));
 }
 
+type ChartRow = Record<string, string | number>;
+
 export default function AdminAnalyticsPage() {
   const [loading, setLoading] = useState(true);
   const [metrics, setMetrics] = useState({ users: 0, stadiums: 0, events: 0, teams: 0, totalRevenue: 0, confirmedBookings: 0 });
-  const [growthData, setGrowthData] = useState<any[]>([]);
-  const [distributionData, setDistributionData] = useState<any[]>([]);
-  const [dailyRevenue, setDailyRevenue] = useState<any[]>([]);
-  const [monthlyRevenue, setMonthlyRevenue] = useState<any[]>([]);
+  const [growthData, setGrowthData] = useState<ChartRow[]>([]);
+  const [distributionData, setDistributionData] = useState<ChartRow[]>([]);
+  const [dailyRevenue, setDailyRevenue] = useState<ChartRow[]>([]);
+  const [monthlyRevenue, setMonthlyRevenue] = useState<ChartRow[]>([]);
   const [revenueTab, setRevenueTab] = useState<"daily" | "monthly">("daily");
 
   useEffect(() => {

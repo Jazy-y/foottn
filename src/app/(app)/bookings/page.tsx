@@ -299,7 +299,7 @@ function QRTicketDialog({
             </div>
           </div>
           <p className="mt-4 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-            présentez ce code à l'entrée
+            présentez ce code à l&apos;entrée
           </p>
         </div>
       </div>

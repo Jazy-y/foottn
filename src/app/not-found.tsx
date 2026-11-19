@@ -21,7 +21,7 @@ export default function NotFound() {
           href="/"
           className="mt-8 inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 font-mono text-xs uppercase tracking-wider text-primary-foreground hover:opacity-90"
         >
-          retour à l'accueil →
+          retour à l&apos;accueil →
         </Link>
       </GlassCard>
     </div>

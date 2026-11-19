@@ -10,7 +10,6 @@ import type { Post } from "@/types";
 import { CheckCircle, Trash2, Heart, MessageSquare, Flag, ShieldCheck, Loader2 } from "lucide-react";
 import { Timestamp } from "firebase/firestore";
 import { formatDistanceToNow } from "date-fns";
-import { fr } from "date-fns/locale";
 
 function toDate(t: unknown): Date | null {
   if (!t) return null;

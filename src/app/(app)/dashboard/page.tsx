@@ -92,7 +92,7 @@ export default function DashboardPage() {
             </GradientText>
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            voici l'aperçu de votre protocole pour aujourd'hui.
+            voici l&apos;aperçu de votre protocole pour aujourd&apos;hui.
           </p>
         </div>
         <Link

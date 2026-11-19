@@ -8,7 +8,6 @@ import { Timestamp } from "firebase/firestore";
 import { ArrowLeft, Heart, Loader2, Send } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { GlassCard } from "@/components/ui/glass-card";
-import { GradientText } from "@/components/ui/gradient-text";
 import { addComment, getPostComments, getRecentPosts, togglePostLike } from "@/services/db";
 import type { Comment, Post } from "@/types";
 import { formatDistanceToNow } from "date-fns";
@@ -158,7 +157,7 @@ export default function FeedDetailPage() {
                   liked ? "text-primary" : "text-muted-foreground hover:text-foreground"
                 }`}>
                 <Heart className={`h-4 w-4 ${liked ? "fill-primary" : ""}`} />
-                J'aime
+                J&apos;aime
               </button>
             </div>
           </GlassCard>

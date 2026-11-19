@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { format } from "date-fns";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   Clock,
   Calendar as CalendarIcon,
@@ -32,6 +32,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { createBooking, updateBookingPayment, addWalletTransaction } from "@/services/db";
 import { toast } from "sonner";
 import jsPDF from "jspdf";
+import { authedFetch } from "@/lib/api-client";
+import { calculateBookingPrice } from "@/lib/pricing";
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
@@ -127,7 +129,6 @@ function StripePaymentForm({
   duration,
   total,
   userName,
-  userEmail,
   onSuccess,
   onCancel,
 }: {
@@ -139,7 +140,6 @@ function StripePaymentForm({
   duration: number;
   total: number;
   userName: string;
-  userEmail: string;
   onSuccess: () => void;
   onCancel: () => void;
 }) {
@@ -178,17 +178,9 @@ function StripePaymentForm({
       downloadReceipt({ stadiumName, date, time, duration, total, ticketCode, userName });
 
       // Send confirmation email (fire and forget)
-      fetch("/api/send-booking-email", {
+      authedFetch("/api/send-booking-email", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          to: userEmail,
-          stadiumName,
-          date,
-          time,
-          total,
-          ticketCode,
-        }),
+        body: JSON.stringify({ bookingId }),
       }).catch(() => {});
 
       onSuccess();
@@ -284,11 +276,12 @@ export function BookingWidget({ stadium }: { stadium: Stadium }) {
   const [bookingId, setBookingId] = useState<string>("");
   const [ticketCode, setTicketCode] = useState<string>("");
 
-  const isPeak = selectedSlot && parseInt(selectedSlot.split(":")[0], 10) >= 18;
-  const peakMultiplier = isPeak ? 1.2 : 1;
-  const subtotal = stadium.pricePerHour * duration * peakMultiplier;
-  const fees = subtotal * 0.04;
-  const total = subtotal + fees;
+  const startHour = selectedSlot ? parseInt(selectedSlot.split(":")[0], 10) : 0;
+  const { subtotal, fees, total, isPeak } = calculateBookingPrice(
+    stadium.pricePerHour,
+    duration,
+    startHour,
+  );
 
   const formattedDate = date ? format(date, "dd MMM yyyy") : "—";
   const formattedTime = selectedSlot ?? "—";
@@ -358,7 +351,7 @@ export function BookingWidget({ stadium }: { stadium: Stadium }) {
       });
       toast.success("Paiement par portefeuille confirmé !");
       setStep("success");
-    } catch (err) {
+    } catch {
       toast.error("Erreur lors du paiement. Réessayez.");
     } finally {
       setPayingWallet(false);
@@ -369,10 +362,10 @@ export function BookingWidget({ stadium }: { stadium: Stadium }) {
   const handlePayWithStripe = async () => {
     setIsSubmitting(true);
     try {
-      const res = await fetch("/api/create-payment-intent", {
+      // The server recomputes the amount from the stored booking.
+      const res = await authedFetch("/api/create-payment-intent", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount: total, currency: "eur", bookingId, stadiumName: stadium.name }),
+        body: JSON.stringify({ type: "booking", bookingId }),
       });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
@@ -625,7 +618,6 @@ export function BookingWidget({ stadium }: { stadium: Stadium }) {
             duration={duration}
             total={total}
             userName={user?.displayName ?? user?.email ?? "Client"}
-            userEmail={user?.email ?? ""}
             onSuccess={() => setStep("success")}
             onCancel={() => {
               setStep("select");

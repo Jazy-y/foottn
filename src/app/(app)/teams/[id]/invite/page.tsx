@@ -58,7 +58,7 @@ export default function TeamInvitePage() {
         className="inline-flex items-center gap-1.5 font-mono text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors mb-6"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
-        retour à l'équipe
+        retour à l&apos;équipe
       </Link>
 
       <div className="mb-8">

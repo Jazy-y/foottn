@@ -110,8 +110,8 @@ export default function AdminTicketsPage() {
   const [filter, setFilter] = useState<"ALL" | "OPEN" | "IN_PROGRESS" | "CLOSED">("ALL");
   const [updating, setUpdating] = useState<string | null>(null);
 
-  const load = async () => {
-    setLoading(true);
+  // Initial fetch runs from the effect; `load` also shows the spinner on refresh.
+  const fetchData = async () => {
     try {
       const [tix, userList] = await Promise.all([
         listAllTickets(),
@@ -128,7 +128,16 @@ export default function AdminTicketsPage() {
     }
   };
 
-  useEffect(() => { load(); }, []);
+  const load = async () => {
+    setLoading(true);
+    await fetchData();
+  };
+
+  useEffect(() => {
+    (async () => {
+      await fetchData();
+    })();
+  }, []);
 
   const changeStatus = async (id: string, status: Ticket["status"]) => {
     setUpdating(id);

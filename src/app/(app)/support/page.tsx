@@ -27,7 +27,7 @@ export default function SupportPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user || isAdmin) { setLoading(false); return; }
+    if (!user || isAdmin) return;
     (async () => {
       setTickets(await getUserTickets(user.uid));
       setLoading(false);
@@ -68,7 +68,7 @@ export default function SupportPage() {
             <div>
               <p className="font-mono text-sm font-semibold mb-1">Espace administrateur</p>
               <p className="font-mono text-xs text-muted-foreground max-w-sm">
-                En tant qu'administrateur, la gestion des tickets se fait depuis la console admin.
+                En tant qu&apos;administrateur, la gestion des tickets se fait depuis la console admin.
               </p>
             </div>
             <Link

@@ -216,7 +216,7 @@ export default function BookingDetailPage() {
             <div className="flex items-center gap-1.5 justify-center mt-3 text-emerald-300">
               <CheckCircle2 className="h-3 w-3" />
               <span className="text-[10px] uppercase tracking-wider">
-                valable pour l'entrée
+                valable pour l&apos;entrée
               </span>
             </div>
           </div>

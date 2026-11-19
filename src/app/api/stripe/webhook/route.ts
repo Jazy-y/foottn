@@ -12,11 +12,17 @@ export async function POST(req: Request) {
     const stripe = new Stripe(key, { apiVersion: "2026-04-22.dahlia" });
     const body = await req.text();
     const event = stripe.webhooks.constructEvent(body, sig, secret);
-    if (event.type === "checkout.session.completed") {
-      // TODO: update booking + wallet/invoice documents in Firestore.
+    // Signature verification is in place, but server-side fulfilment is not:
+    // writing bookings/wallets from here requires the Firebase Admin SDK and a
+    // service account configured in the deployment. Until then, the client
+    // records the payment result (see README → Known limitations).
+    if (event.type === "payment_intent.succeeded") {
+      const intent = event.data.object as Stripe.PaymentIntent;
+      console.warn(`[stripe-webhook] payment_intent.succeeded ${intent.id} (not fulfilled server-side)`);
     }
     return NextResponse.json({ received: true });
   } catch (error) {
-    return NextResponse.json({ error: (error as Error).message }, { status: 400 });
+    console.error("[stripe-webhook]", (error as Error).message);
+    return NextResponse.json({ error: "Invalid webhook payload" }, { status: 400 });
   }
 }

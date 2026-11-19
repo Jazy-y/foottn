@@ -799,7 +799,7 @@ export const getRecentVisits = async (days: number = 7) => {
       limit(days)
     );
     const snap = await getDocs(q);
-    return snap.docs.map((d) => d.data() as { date: string; count: number; lastUpdated: any });
+    return snap.docs.map((d) => d.data() as { date: string; count: number; lastUpdated: unknown });
   } catch (error) {
     console.error("Failed to fetch visits", error);
     return [];

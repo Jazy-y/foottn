@@ -1,5 +1,6 @@
 "use client";
 
+import { toDateValue } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { AuthGuard } from "@/components/layout/AuthGuard";
 import { GlassCard } from "@/components/ui/glass-card";
@@ -15,8 +16,8 @@ export default function AdminStadiumsPage() {
   const [loading, setLoading] = useState(true);
   const [processingId, setProcessingId] = useState<string | null>(null);
 
-  const load = async () => {
-    setLoading(true);
+  // Initial fetch runs from the effect; `load` also shows the spinner on refresh.
+  const fetchData = async () => {
     try {
       const [stadiums, users] = await Promise.all([
         getAllStadiumsAdmin(),
@@ -33,12 +34,21 @@ export default function AdminStadiumsPage() {
     }
   };
 
-  useEffect(() => { load(); }, []);
+  const load = async () => {
+    setLoading(true);
+    await fetchData();
+  };
 
-  const formatDate = (date: any) => {
-    if (!date) return "N/A";
+  useEffect(() => {
+    (async () => {
+      await fetchData();
+    })();
+  }, []);
+
+  const formatDate = (date: unknown) => {
+    const d = toDateValue(date);
+    if (!d) return "N/A";
     try {
-      const d = date.toDate ? date.toDate() : new Date(date);
       return d.toLocaleDateString("fr-FR", { year: "numeric", month: "short", day: "numeric" });
     } catch { return "N/A"; }
   };
@@ -92,7 +102,7 @@ export default function AdminStadiumsPage() {
             </div>
           ) : items.length === 0 ? (
             <GlassCard className="p-8 text-center text-muted-foreground">
-              Aucun stade n'a été trouvé.
+              Aucun stade n&apos;a été trouvé.
             </GlassCard>
           ) : (
             items.map((s) => (
@@ -147,18 +157,18 @@ export default function AdminStadiumsPage() {
                 <div className="shrink-0 flex items-center md:flex-col justify-end gap-2 w-full md:w-auto mt-2 md:mt-0 pt-4 md:pt-0 border-t border-white/5 md:border-0">
                   {/* Approval status badge */}
                   <div className={`w-full md:w-auto inline-flex items-center justify-center gap-1.5 rounded-full border px-3 py-1 font-mono text-[10px] uppercase tracking-wider ${
-                    (s as any).approved === true
+                    s.approved === true
                       ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-300"
-                      : (s as any).approved === false
+                      : s.approved === false
                         ? "border-red-500/20 bg-red-500/10 text-red-300"
                         : "border-amber-500/20 bg-amber-500/10 text-amber-300"
                   }`}>
-                    {(s as any).approved === true ? "Approuvé" : (s as any).approved === false ? "Rejeté" : "En attente"}
+                    {s.approved === true ? "Approuvé" : s.approved === false ? "Rejeté" : "En attente"}
                   </div>
                   {/* Approve */}
                   <button
                     onClick={() => s.id && handleApprove(s.id, true)}
-                    disabled={processingId === s.id || (s as any).approved === true}
+                    disabled={processingId === s.id || s.approved === true}
                     className="w-full md:w-10 md:h-10 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-2.5 hover:bg-emerald-500/20 hover:text-emerald-300 transition-colors text-emerald-400/80 flex items-center justify-center gap-2 font-mono text-[10px] uppercase tracking-wider disabled:opacity-40"
                     title="Approuver le stade"
                   >
@@ -168,7 +178,7 @@ export default function AdminStadiumsPage() {
                   {/* Reject */}
                   <button
                     onClick={() => s.id && handleApprove(s.id, false)}
-                    disabled={processingId === s.id || (s as any).approved === false}
+                    disabled={processingId === s.id || s.approved === false}
                     className="w-full md:w-10 md:h-10 rounded-lg border border-amber-500/20 bg-amber-500/10 p-2.5 hover:bg-amber-500/20 hover:text-amber-300 transition-colors text-amber-400/80 flex items-center justify-center gap-2 font-mono text-[10px] uppercase tracking-wider disabled:opacity-40"
                     title="Rejeter le stade"
                   >

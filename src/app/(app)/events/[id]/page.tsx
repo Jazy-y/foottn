@@ -387,7 +387,7 @@ export default function EventDetailPage() {
           </div>
           {participants.length === 0 ? (
             <p className="font-mono text-xs text-muted-foreground">
-              aucun participant pour l'instant — soyez le premier à rejoindre.
+              aucun participant pour l&apos;instant — soyez le premier à rejoindre.
             </p>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">

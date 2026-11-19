@@ -96,7 +96,7 @@ export default function StadiumDetailsPage() {
           className="inline-flex items-center gap-1.5 font-mono text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors mb-6"
         >
           <ChevronLeft className="h-3.5 w-3.5" />
-          retour à l'explorateur
+          retour à l&apos;explorateur
         </Link>
 
         {/* Hero image */}
@@ -175,7 +175,7 @@ export default function StadiumDetailsPage() {
             <GlassCard className="p-6">
               <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-5">
                 <Clock className="h-3.5 w-3.5 text-primary" />
-                heures d'ouverture
+                heures d&apos;ouverture
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 font-mono text-sm">
                 {[

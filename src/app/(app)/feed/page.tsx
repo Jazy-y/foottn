@@ -12,7 +12,6 @@ import { Timestamp } from "firebase/firestore";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { GlassCard } from "@/components/ui/glass-card";
-import { GradientText } from "@/components/ui/gradient-text";
 import {
   createPost, getRecentPosts, togglePostLike,
   flagPost, updatePost, deletePost,
@@ -160,7 +159,7 @@ function PostCard({
               liked ? "text-primary bg-primary/10" : "text-muted-foreground hover:bg-white/[0.04] hover:text-foreground"
             }`}>
             <Heart className={`h-4 w-4 ${liked ? "fill-primary" : ""}`} />
-            J'aime
+            J&apos;aime
           </button>
           <Link href={`/feed/${post.id}`}
             className="flex-1 flex items-center justify-center gap-2 py-2.5 font-mono text-xs uppercase tracking-wider text-muted-foreground hover:bg-white/[0.04] hover:text-foreground rounded-lg transition-all my-1">
@@ -343,7 +342,7 @@ export default function FeedPage() {
             </div>
           ) : posts.length === 0 ? (
             <GlassCard className="p-12 text-center">
-              <p className="font-mono text-xs text-muted-foreground">Aucune publication pour l'instant. Soyez le premier !</p>
+              <p className="font-mono text-xs text-muted-foreground">Aucune publication pour l&apos;instant. Soyez le premier !</p>
             </GlassCard>
           ) : (
             <AnimatePresence>
@@ -375,7 +374,7 @@ export default function FeedPage() {
                 <Avatar photo={u.photo} name={u.name} size={8} />
                 <div className="flex-1 min-w-0">
                   <div className="font-mono text-xs font-semibold truncate">{u.name}</div>
-                  <div className="font-mono text-[10px] text-muted-foreground">{u.posts} posts · {u.likes} j'aime</div>
+                  <div className="font-mono text-[10px] text-muted-foreground">{u.posts} posts · {u.likes} j&apos;aime</div>
                 </div>
               </div>
             ))}

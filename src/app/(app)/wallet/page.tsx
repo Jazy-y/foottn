@@ -18,6 +18,11 @@ import { GlassCard } from "@/components/ui/glass-card";
 import { GradientText } from "@/components/ui/gradient-text";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { authedFetch } from "@/lib/api-client";
+import { WALLET_TOPUP_MAX, WALLET_TOPUP_MIN } from "@/lib/pricing";
+
+const isValidTopUp = (amount: number) =>
+  Number.isFinite(amount) && amount >= WALLET_TOPUP_MIN && amount <= WALLET_TOPUP_MAX;
 import { addWalletTransaction, getUserWalletTx } from "@/services/db";
 import type { WalletTransaction } from "@/types";
 import { Timestamp } from "firebase/firestore";
@@ -33,7 +38,9 @@ function toDate(t: unknown): Date | null {
   if (!t) return null;
   if (t instanceof Date) return t;
   if (t instanceof Timestamp) return t.toDate();
-  if (typeof t === "object" && (t as any).toDate) return (t as any).toDate();
+  if (typeof t === "object" && "toDate" in t && typeof t.toDate === "function") {
+    return (t as { toDate: () => Date }).toDate();
+  }
   return null;
 }
 
@@ -129,9 +136,8 @@ export default function WalletPage() {
     .filter((t) => t.kind === "TOPUP")
     .reduce((sum, t) => sum + t.amount, 0);
 
-  const loadTransactions = async () => {
+  const fetchTransactions = async () => {
     if (!user) return;
-    setLoadingTx(true);
     try {
       setTransactions(await getUserWalletTx(user.uid));
     } finally {
@@ -139,21 +145,26 @@ export default function WalletPage() {
     }
   };
 
-  useEffect(() => { loadTransactions(); }, [user]);
+  const loadTransactions = async () => {
+    setLoadingTx(true);
+    await fetchTransactions();
+  };
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- reload only when the user changes
+  useEffect(() => { fetchTransactions(); }, [user]);
 
   const handleSelectAmount = async (amount: number) => {
     setSelectedAmount(amount);
     setLoadingIntent(true);
     try {
-      const res = await fetch("/api/create-payment-intent", {
+      const res = await authedFetch("/api/create-payment-intent", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount, currency: "eur", type: "wallet_topup" }),
+        body: JSON.stringify({ amount, type: "wallet_topup" }),
       });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
       setClientSecret(data.clientSecret);
-    } catch (err) {
+    } catch {
       toast.error("Impossible d'initialiser le paiement");
       setSelectedAmount(null);
     } finally {
@@ -298,8 +309,8 @@ export default function WalletPage() {
                   <div className="relative">
                     <input
                       type="number"
-                      min={5}
-                      max={5000}
+                      min={WALLET_TOPUP_MIN}
+                      max={WALLET_TOPUP_MAX}
                       step={1}
                       placeholder="0.00"
                       value={customAmount}
@@ -310,8 +321,11 @@ export default function WalletPage() {
                       TND
                     </div>
                   </div>
-                  {customAmount && parseFloat(customAmount) < 5 && (
-                    <p className="font-mono text-[10px] text-amber-300">Montant minimum : 5 TND</p>
+                  {customAmount && parseFloat(customAmount) < WALLET_TOPUP_MIN && (
+                    <p className="font-mono text-[10px] text-amber-300">Montant minimum : {WALLET_TOPUP_MIN} TND</p>
+                  )}
+                  {customAmount && parseFloat(customAmount) > WALLET_TOPUP_MAX && (
+                    <p className="font-mono text-[10px] text-amber-300">Montant maximum : {WALLET_TOPUP_MAX} TND</p>
                   )}
                 </div>
 
@@ -336,13 +350,13 @@ export default function WalletPage() {
                 <button
                   onClick={() => {
                     const amt = parseFloat(customAmount);
-                    if (!isNaN(amt) && amt >= 5) handleSelectAmount(amt);
+                    if (isValidTopUp(amt)) handleSelectAmount(amt);
                   }}
-                  disabled={!customAmount || parseFloat(customAmount) < 5}
+                  disabled={!isValidTopUp(parseFloat(customAmount))}
                   className="w-full h-12 rounded-xl bg-primary text-primary-foreground font-mono text-sm uppercase tracking-wider hover:bg-primary/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   <CreditCard className="h-4 w-4" />
-                  Recharger {customAmount && parseFloat(customAmount) >= 5 ? `${parseFloat(customAmount).toFixed(2)} TND` : ""}
+                  Recharger {isValidTopUp(parseFloat(customAmount)) ? `${parseFloat(customAmount).toFixed(2)} TND` : ""}
                 </button>
 
                 <p className="font-mono text-[10px] text-muted-foreground/50 text-center">

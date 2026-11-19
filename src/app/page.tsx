@@ -230,14 +230,14 @@ export default function Home() {
             {/* Headline */}
             <motion.h1 variants={fade} className="font-mono text-5xl sm:text-6xl md:text-7xl xl:text-8xl font-semibold leading-[1.0] tracking-tight text-balance">
               Le terrain.{" "}
-              <GradientText className="font-semibold">L'équipe.</GradientText>
+              <GradientText className="font-semibold">L&apos;équipe.</GradientText>
               <br />
-              <span className="text-foreground/80">Le coup d'envoi.</span>
+              <span className="text-foreground/80">Le coup d&apos;envoi.</span>
             </motion.h1>
 
             {/* Sub */}
             <motion.p variants={fade} className="mt-7 max-w-xl mx-auto text-base md:text-lg text-muted-foreground leading-relaxed">
-              FootTN regroupe réservation de stades, gestion d'équipes et tournois dans un seul tableau de bord premium.
+              FootTN regroupe réservation de stades, gestion d&apos;équipes et tournois dans un seul tableau de bord premium.
             </motion.p>
 
             {/* CTAs */}
@@ -321,7 +321,7 @@ export default function Home() {
             <div>
               <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-emerald-400 mb-3">/ comment ça marche</div>
               <h2 className="font-mono text-3xl md:text-5xl font-semibold tracking-tight leading-[1.1]">
-                Du vestiaire au{" "}<GradientText className="font-semibold">coup d'envoi</GradientText>{" "}en 60 secondes.
+                Du vestiaire au{" "}<GradientText className="font-semibold">coup d&apos;envoi</GradientText>{" "}en 60 secondes.
               </h2>
               <p className="mt-5 text-muted-foreground leading-relaxed">
                 Chaque interaction est reliée dans une couche de contexte unique — données en direct, actualisation instantanée.
@@ -405,7 +405,7 @@ export default function Home() {
                 Prêt à entrer{" "}<GradientText className="font-semibold">sur le terrain ?</GradientText>
               </h2>
               <p className="mt-5 text-muted-foreground max-w-md mx-auto">
-                Créez votre compte FootTN gratuitement. Les propriétaires obtiennent 3 mois d'analyses offerts.
+                Créez votre compte FootTN gratuitement. Les propriétaires obtiennent 3 mois d&apos;analyses offerts.
               </p>
               <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
                 <Link href="/register" className="inline-flex items-center gap-2 rounded-full bg-emerald-500 px-7 py-3.5 font-mono text-sm uppercase tracking-wider text-black font-semibold hover:bg-emerald-400 transition-colors shadow-[0_0_40px_rgba(34,197,94,0.35)]">

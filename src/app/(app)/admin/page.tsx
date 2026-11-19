@@ -84,7 +84,7 @@ export default function AdminConsolePage() {
             <GradientText className="font-medium">console admin</GradientText>
           </h1>
           <p className="font-mono text-xs text-muted-foreground mt-2">
-            Gérez l'ensemble de la plateforme FootTN depuis ce tableau de bord.
+            Gérez l&apos;ensemble de la plateforme FootTN depuis ce tableau de bord.
           </p>
         </div>
 

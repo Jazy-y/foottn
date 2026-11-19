@@ -1,5 +1,6 @@
 "use client";
 
+import { toDateValue } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { AuthGuard } from "@/components/layout/AuthGuard";
 import { GlassCard } from "@/components/ui/glass-card";
@@ -8,8 +9,7 @@ import { deleteEvent, getAllEvents } from "@/services/db";
 import type { SportEvent } from "@/types";
 import { 
   Calendar as CalendarIcon, 
-  Image as ImageIcon, 
-  Trash2, 
+  Trash2,
   User, 
   MapPin, 
   Clock, 
@@ -22,8 +22,8 @@ export default function AdminEventsPage() {
   const [items, setItems] = useState<SportEvent[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const load = async () => {
-    setLoading(true);
+  // Initial fetch runs from the effect; `load` also shows the spinner on refresh.
+  const fetchData = async () => {
     try {
       const events = await getAllEvents();
       // Sort by start time (newest first or upcoming)
@@ -42,16 +42,23 @@ export default function AdminEventsPage() {
     }
   };
 
+  const load = async () => {
+    setLoading(true);
+    await fetchData();
+  };
+
   useEffect(() => {
-    load();
+    (async () => {
+      await fetchData();
+    })();
   }, []);
 
-  const formatDate = (date: any) => {
-    if (!date) return "N/A";
+  const formatDate = (date: unknown) => {
+    const d = toDateValue(date);
+    if (!d) return "N/A";
     try {
-      const d = date.toDate ? date.toDate() : new Date(date);
       return d.toLocaleDateString("fr-FR", { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
-    } catch (e) {
+    } catch {
       return "N/A";
     }
   };
@@ -102,7 +109,7 @@ export default function AdminEventsPage() {
             </div>
           ) : items.length === 0 ? (
             <GlassCard className="p-8 text-center text-muted-foreground">
-              Aucun événement n'a été trouvé.
+              Aucun événement n&apos;a été trouvé.
             </GlassCard>
           ) : (
             items.map((e) => (

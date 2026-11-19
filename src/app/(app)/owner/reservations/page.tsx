@@ -1,5 +1,6 @@
 "use client";
 
+import { toDateValue } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { AuthGuard } from "@/components/layout/AuthGuard";
 import { GlassCard } from "@/components/ui/glass-card";
@@ -37,16 +38,14 @@ export default function OwnerReservationsPage() {
         href: "/profile"
       });
 
-    } catch (e) {
+    } catch {
       toast.error("Erreur de permission ou réseau");
     }
   };
 
-  const toDate = (t: any) => {
+  const toDate = (t: unknown) => {
     if (t instanceof Timestamp) return t.toDate();
-    if (t?.toDate) return t.toDate();
-    if (t instanceof Date) return t;
-    return new Date();
+    return toDateValue(t) ?? new Date();
   };
 
   return (

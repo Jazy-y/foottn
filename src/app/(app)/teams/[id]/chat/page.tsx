@@ -83,7 +83,7 @@ export default function TeamChatPage() {
           </Link>
           <div>
             <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-              / discussion d'équipe
+              / discussion d&apos;équipe
             </div>
             <h1 className="font-mono text-xl font-medium">
               <GradientText className="font-medium">
@@ -105,7 +105,7 @@ export default function TeamChatPage() {
         >
           {messages.length === 0 ? (
             <div className="h-full grid place-items-center font-mono text-xs text-muted-foreground">
-              aucun message pour l'instant — soyez le premier à écrire.
+              aucun message pour l&apos;instant — soyez le premier à écrire.
             </div>
           ) : (
             messages.map((m) => {

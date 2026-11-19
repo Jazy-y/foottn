@@ -96,17 +96,9 @@ export function useProfileData(): ProfileData {
   useEffect(() => {
     if (!user || !appUser) return;
 
-    // Sync fields available immediately from Firebase Auth
+    // Fields available immediately from Firebase Auth
     const emailVerified = user.emailVerified;
     const lastSignInTime = user.metadata?.lastSignInTime ?? null;
-
-    setData((prev) => ({
-      ...prev,
-      loading: true,
-      error: null,
-      emailVerified,
-      lastSignInTime,
-    }));
 
     const run = async () => {
       try {
@@ -124,10 +116,19 @@ export function useProfileData(): ProfileData {
           default:
             patch = {};
         }
-        setData((prev) => ({ ...prev, ...patch, loading: false }));
+        setData((prev) => ({
+          ...prev,
+          ...patch,
+          emailVerified,
+          lastSignInTime,
+          error: null,
+          loading: false,
+        }));
       } catch {
         setData((prev) => ({
           ...prev,
+          emailVerified,
+          lastSignInTime,
           loading: false,
           error: "Impossible de charger les données du profil.",
         }));

@@ -141,7 +141,7 @@ export default function ProfileEditPage() {
           / profil · modifier
         </div>
         <h1 className="font-mono text-3xl font-medium">
-          <GradientText className="font-medium">mettre à jour l'identité</GradientText>
+          <GradientText className="font-medium">mettre à jour l&apos;identité</GradientText>
         </h1>
       </div>
 
@@ -225,7 +225,7 @@ export default function ProfileEditPage() {
           {/* ── Display name ── */}
           <div className="space-y-1.5">
             <label className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-              nom d'affichage
+              nom d&apos;affichage
             </label>
             <Input
               value={displayName}

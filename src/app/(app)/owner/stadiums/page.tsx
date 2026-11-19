@@ -31,20 +31,18 @@ function StatCard({ icon: Icon, label, value, sub, color }: {
   );
 }
 
-function StatusBadge({ status }: { status?: string }) {
-  const approved = status === "approved";
-  const pending = !status || status === "pending";
-  if (approved) return (
+// Stadium approval is stored as a boolean `approved` flag (see services/db.ts).
+function StatusBadge({ approved }: { approved?: boolean }) {
+  if (approved === true) return (
     <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-emerald-400">
       <CheckCircle2 className="h-3 w-3" /> Approuvé
     </span>
   );
-  if (pending) return (
+  return (
     <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 border border-amber-500/20 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-amber-400">
       <AlertCircle className="h-3 w-3" /> En attente
     </span>
   );
-  return null;
 }
 
 export default function OwnerStadiumsPage() {
@@ -101,7 +99,7 @@ export default function OwnerStadiumsPage() {
     setDeletingId(null);
   };
 
-  const approved = items.filter(s => (s as any).status === "approved").length;
+  const approved = items.filter((s) => s.approved === true).length;
 
   return (
     <AuthGuard requiredRole={["OWNER", "SUPER_ADMIN"]}>
@@ -231,7 +229,7 @@ export default function OwnerStadiumsPage() {
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                     <div className="absolute bottom-3 left-3">
-                      <StatusBadge status={(s as any).status} />
+                      <StatusBadge approved={s.approved} />
                     </div>
                   </div>
 

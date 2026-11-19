@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useRef, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import { AuthGuard } from "@/components/layout/AuthGuard";
 import { GlassCard } from "@/components/ui/glass-card";
@@ -70,7 +70,6 @@ function MiniAvatar({ user, isSupport }: { user?: User | null; isSupport?: boole
 
 export default function SupportDetailPage() {
   const params = useParams();
-  const router = useRouter();
   const id = params.id as string;
   const { user, appUser } = useAuth();
   const isAdmin = appUser?.role === "SUPER_ADMIN";
@@ -229,7 +228,7 @@ export default function SupportDetailPage() {
           <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-[300px] max-h-[480px]">
             {messages.length === 0 && (
               <div className="flex items-center justify-center h-full py-12">
-                <p className="font-mono text-xs text-muted-foreground">Aucun message pour l'instant</p>
+                <p className="font-mono text-xs text-muted-foreground">Aucun message pour l&apos;instant</p>
               </div>
             )}
             {messages.map((m) => {

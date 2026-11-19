@@ -64,7 +64,7 @@ export default function CreateTeamPage() {
         <form onSubmit={submit} className="space-y-5">
           <div className="space-y-1.5">
             <label className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-              nom de l'équipe
+              nom de l&apos;équipe
             </label>
             <Input
               value={name}

@@ -27,7 +27,9 @@ function toDate(t: unknown): Date {
   if (!t) return new Date();
   if (t instanceof Date) return t;
   if (t instanceof Timestamp) return t.toDate();
-  if (typeof t === "object" && (t as any).toDate) return (t as any).toDate();
+  if (typeof t === "object" && "toDate" in t && typeof t.toDate === "function") {
+    return (t as { toDate: () => Date }).toDate();
+  }
   return new Date(t as string);
 }
 
